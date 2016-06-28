@@ -88,7 +88,7 @@
 				community for blackholing at IP networks and Internet Exchange Points (IXP). This well-known 
 				advisory transitive BGP
 				community, namely BLACKHOLE, allows an origin AS to specify that a neighboring IP network or IXP 
-				should blackhole a specific IP prefix.
+				participant should blackhole a specific IP prefix.
 			</t>
 		</abstract>
 
@@ -115,36 +115,35 @@
 				The network infrastructure has been getting hammered by DDoS attacks for years. In order to block 
 				DDoS attacks, IP networks have offered BGP blackholing to neighboring networks (<xref target="
 				RFC3882">iBGP scenarios</xref> and <xref target="RFC5635">RTBH filtering</xref>), much like some 
-				IXPs have recently started to do. 
+				IXP participants have recently started to do. 
 			</t>
 
 			<t>
 				DDoS attacks targeting a certain IP network may cause congestion of links used to connect to other 
 				networks. In order to limit the impact of such a scenario on legitimate traffic, IP networks and 
-				IXPs adopted a mechanism
+				IXP particpants adopted a mechanism
 				called BGP blackholing. A network that wants to trigger blackholing needs to understand the 
-				triggering mechanism adopted by its neighboring IP networks and IXPs. Different IP networks and
-				IXPs provide different BGP mechanisms to trigger blackholing, including pre-defined blackhole next-
-				hop IP addresses and pre-defined BGP communities.
+        triggering mechanism adopted by its neighboring IP networks and IXP participantss. Different
+        IP networks and IXP participants provide different BGP mechanisms to trigger blackholing, including
+        pre-defined blackhole next-hop IP addresses and pre-defined BGP communities.
 			</t>
 
 			<t>
-				Having several different mechanisms to trigger blackholing at 
-				different IP networks and IXPs makes it an unnecessarily complex, error-prone and cumbersome task
-				for network operators.
+        Having several different mechanisms to trigger blackholing at different IP networks and IXP
+        participants makes it an unnecessarily complex, error-prone and cumbersome task for network operators.
 				Therefore a well-known <xref target="RFC1997">BGP community</xref> is defined for operational ease.
 			</t>
 
 			<t>
 				Having such a well-known BGP community for blackholing
-				also supports IP networks and IXPs because
+				also supports IP networks and IXP participants because
 				<list style='symbols'>
                 	<t> implementing and monitoring blackholing gets easier if implementation
                 		and operational guides do not cover many options that trigger blackholing
                 	</t>
                 	<t> the number of support requests from customers about how to trigger
-                		blackholing at a particular IP network or IXP will be reduced as the mechanism is
-                		unified
+                    blackholing at a particular IP network or IXP participant will be reduced as
+                    the mechanism is unified
                 	</t>
             	</list>
 			</t>
@@ -172,8 +171,8 @@
 			<section anchor="morespecific" title="IP Prefix Announcements with BLACKHOLE Community Attached">
 				<t>
 					When an IP network is under DDoS duress, it MAY announce an IP prefix covering the victim's IP
-					address(es) for the purpose of signaling to neighboring IP networks or IXPs that any traffic
-					destined for these IP address(es) should be discarded. In such a scenario, the network
+          address(es) for the purpose of signaling to neighboring IP networks or IXP participantss that
+          any traffic destined for these IP address(es) should be discarded. In such a scenario, the network
 					operator SHOULD attach BLACKHOLE BGP community.
 				</t>
 			</section>
