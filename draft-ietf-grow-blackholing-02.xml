@@ -204,20 +204,24 @@
             <section anchor="small" title="Accepting Blackholed IP Prefixes">
                 <t>
                     It has been observed that announcements of IP prefixes
-                    larger than /24 for IPv4 and /48 for IPv6 are usually not
+                    longer than /24 for IPv4 and /48 for IPv6 are usually not
                     accepted on the Internet (see <xref
                         target="RFC7454">section 6.1.3</xref>). However,
-                    blackhole routes should be as small as possible in order to
+                    blackhole routes should be as long as possible in order to
                     limit the impact of discarding traffic for adjacent IP
                     space that is not under DDoS duress.
                     Typically, the blackhole route's prefix length is as
-                    specific as /32 for IPv4 and /128 for IPv6.
+                    specific as possible, a /32 for IPv4 or a /128 for IPv6.
                 </t>
                 <t>
-                    BGP speakers SHOULD only accept and honor BGP announcements
-                    carrying the BLACKHOLE community if the announced prefix is
-                    covered by a shorter prefix for which the neighboring
-                    network is authorized to advertise.
+                    BGP speakers in a direct peering relationship MUST only
+                    accept and honor BGP announcements carrying the BLACKHOLE
+                    community if the announced prefix is covered by a shorter
+                    prefix for which the neighboring network is authorized to
+                    advertise. In topologies where a Route Server or other
+                    distant-peer relationships exist, BGP speakers SHOULD
+                    accept and honor BGP announcements under the same
+                    conditions.
                 </t>
             </section>
         </section>
