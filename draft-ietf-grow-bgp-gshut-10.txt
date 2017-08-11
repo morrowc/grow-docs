@@ -100,11 +100,18 @@ Table of Contents
 
 1.  Introduction
 
+   This document defines a well-known community [RFC1997], called
+   GRACEFUL_SHUTDOWN, for the purpose of reducing the management
+   overhead of gracefully shutting down BGP sessions.  The well-known
+   community allows implementers to provide an automated graceful
+   shutdown mechanism that does not require any router reconfiguration
+   at maintenance time.
+
    Routing changes in BGP can be caused by planned maintenance
    operations.  This document discusses operational procedures to be
-   applied in order to reduce or eliminate loss of packets during the
-   maintenance.  These losses come from the transient lack of
-   reachability during the BGP convergence following the shutdown of an
+   applied in order to reduce or eliminate loss of packets during a
+   maintenance.  Loss comes from transient lack of
+   reachability during BGP convergence which follows the shutdown of an
 
 
 
@@ -118,26 +125,19 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
    (ASBR).
 
    This document presents procedures for the cases where the forwarding
-   plane is impacted by the maintenance, hence when the use of Graceful
-   Restart does not apply.
+   plane is impacted by the maintenance, Graceful Restart does not apply
+   during this type of maintenance event.
 
    The procedures described in this document can be applied to reduce or
    avoid packet loss for outbound and inbound traffic flows initially
    forwarded along the peering link to be shut down.  These procedures
-   trigger, in both ASes, rerouting to the alternate path if one exists
+   trigger, in both ASes, rerouting to alternate paths if they exist
    within the AS, while allowing the use of the old path until alternate
    ones are learned.  This ensures that routers always have a valid
    route available during the convergence process.
 
    The goal of the document is to meet the requirements described in
    [RFC6198] at best, without changing the BGP protocol.
-
-   This document defines a well-known community [RFC1997], called
-   GRACEFUL_SHUTDOWN, for the purpose of reducing the management
-   overhead of gracefully shutting down BGP sessions.  The well-known
-   community allows implementers to provide an automated graceful
-   shutdown mechanism that does not require any router reconfiguration
-   at maintenance time.
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -185,8 +185,7 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
 
    Second, within the AS, the FIB of routers can be transiently
    inconsistent during the BGP convergence and packets toward affected
-   prefixes can loop and be dropped.  Note that these loops only happen
-   when ASBR-to-ASBR encapsulation is not used within the AS.
+   prefixes can loop and be dropped.
 
    This document only addresses the first reason.
 
@@ -194,29 +193,6 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
 
    This section describes means for an ISP to reduce the transient loss
    of packets upon a manual shutdown of a BGP session.
-
-4.1.  Improving availability of alternate paths
-
-   All solutions that increase the availability of alternate BGP paths
-   at routers performing forwarding lookups from BGP routes such as
-   [I-D.ietf-idr-best-external] and [RFC7911] help in reducing the LoC
-   bound with the shutdown of EBGP sessions.
-
-   Any such solution where, at any single step of the convergence
-   process following the EBGP session shutdown, a BGP router does not
-   receive a message withdrawing the only path it currently knows for a
-   given NLRI, allows for a simplified graceful shutdown procedure.
-
-   Note that the LoC for the inbound traffic of graceful shutdown
-   initiator, due to the lack of an alternate path on the graceful
-   shutdown receiver is not under the control of the Initiator AS.  The
-   part of the procedure aimed at avoiding LoC for incoming traffic
-   should thus be applied even if no LoC are expected for the outgoing
-   traffic.
-
-
-
-
 
 
 
@@ -226,30 +202,18 @@ Francois, et al.        Expires January 28, 2018                [Page 4]
 Internet-Draft        Graceful BGP session shutdown            July 2017
 
 
-4.2.  Make before break convergence: graceful shutdown
+4.1.  Make before break convergence: graceful shutdown
 
-   The goal of this procedure is to retain the paths to be shutdown
-   between the peers, but with a lower LOCAL_PREF value, allowing the
-   paths to remain in use while alternate paths are selected and
-   propagated, rather than simply withdrawing the paths.  The LOCAL_PREF
-   value must be lower than the one of the alternate path. 0 being the
-   lowest value, it can be used in all cases, except if it already has a
+   The goal of this procedure is to retain paths which transit between
+   between peers which are shutting down a bgp session by 
+   lowering LOCAL_PREF and allowing the paths to remain in use while
+   alternate paths are selected and propagated.  The LOCAL_PREF value
+   must be lower than the one of the alternate path. 0 being the lowest
+   value, it can be used in all cases, except if it already has a
    special meaning within the AS.
 
    Section 5 describes configurations and actions to be performed for
    the graceful shutdown of BGP sessions.
-
-4.3.  Forwarding modes and transient forwarding loops during convergence
-
-   The graceful shutdown procedure or the solutions improving the
-   availability of alternate paths, do not change the fact that BGP
-   convergence and the subsequent FIB updates are run independently on
-   each router of the ASes.  If the AS applying the solution does not
-   rely on encapsulation to forward packets from the Ingress Border
-   Router to the Egress Border Router, then transient forwarding loops
-   and consequent packet losses can occur during the convergence
-   process.  If zero LoC is required, encapsulation is required between
-   ASBRs of the AS.
 
 5.  EBGP graceful shutdown procedure
 
@@ -267,15 +231,6 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
    o  sets the LOCAL_PREF attribute of the paths tagged with the
       GRACEFUL_SHUTDOWN community to a low value
 
-   Note that in the case where an AS is aggregating multiple routes
-   under a covering prefix, it is recommended to filter out the
-   GRACEFUL_SHUTDOWN community from the resulting aggregate BGP route.
-   By doing so, the setting of the GRACEFUL_SHUTDOWN community on one of
-   the aggregated routes will not let the entire aggregate inherit the
-   community.  Not doing so would let the entire aggregate undergo the
-   graceful shutdown behavior.
-
-
 
 Francois, et al.        Expires January 28, 2018                [Page 5]
 
@@ -284,8 +239,8 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
 
 5.2.  Operations at maintenance time
 
-   On the graceful shutdown initiator, upon maintenance time, it is
-   required to:
+   On the graceful shutdown initiator, at maintenance time, the operator
+   must:
 
    o  apply an outbound BGP route policy on the EBGP session to be
       shutdown.  This policy tags the paths propagated over the session
@@ -304,48 +259,23 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
       [I-D.ietf-idr-shutdown] to communicate the reason of the shutdown.
 
    In the case of a shutdown of the whole router, in addition to the
-   graceful shutdown of all EBGP sessions, there is a need to graceful
+   graceful shutdown of all EBGP sessions, there is a need to gracefully
    shutdown the routes originated by this router (e.g, BGP aggregates
    redistributed from other protocols, including static routes).  This
-   can be performed by tagging such routes with the GRACEFUL_SHUTDOWN
+   can be performed by tagging these routes with the GRACEFUL_SHUTDOWN
    community and setting LOCAL_PREF to a low value.
 
 5.3.  BGP implementation support for graceful shutdown
 
-   A BGP router implementation MAY provide features aimed at automating
-   the application of the graceful shutdown procedures described above.
-
-   Upon a session shutdown specified as graceful by the operator, a BGP
-   implementation supporting a graceful shutdown feature SHOULD:
-
-   1.  Update all the paths propagated over the corresponding EBGP
-       session, tagging the GRACEFUL_SHUTDOWN community to them.  Any
-       subsequent update sent over the session being gracefully shut
-       down SHOULD be tagged with the GRACEFUL_SHUTDOWN community.
-
-   2.  Lower the LOCAL_PREF value of the paths received over the EBGP
-       session being shut down and set the GRACEFUL_SHUTDOWN community.
-
-   3.  Optionally shut down the session after a configured time.
-
-   4.  Prevent the GRACEFUL_SHUTDOWN community from being inherited by a
-       path that would aggregate some paths tagged with the GSHUT
-
-
+   BGP Implementers SHOULD provide configuration knobs that utilize
+   the GRACEFUL_SHUTDOWN community to drain bgp neighbors in
+   preparation of impending neighbor shutdown. Implementation details
+   are outside the scope of this document.
 
 Francois, et al.        Expires January 28, 2018                [Page 6]
 
 Internet-Draft        Graceful BGP session shutdown            July 2017
 
-
-       community.  This behavior avoids the GSHUT procedure to be
-       applied to the aggregate upon the graceful shutdown of one of its
-       covered prefixes.
-
-   A BGP implementation supporting a graceful shutdown feature SHOULD
-   also automatically install the BGP policies that are supposed to be
-   configured, as described in Section 5.1 for sessions over which
-   graceful shutdown is to be supported.
 
 6.  Beyond EBGP graceful shutdown
 
@@ -358,81 +288,11 @@ Internet-Draft        Graceful BGP session shutdown            July 2017
    session does not lead to transient unreachability.  As a consequence,
    no specific graceful shutdown action is required.
 
-6.2.  EBGP session establishment
-
-   We identify two potential causes for transient packet losses upon the
-   establishment of an EBGP session.  The first one is local to the
-   startup initiator, the second one is due to the BGP convergence
-   following the injection of new best paths within the IBGP topology.
-
-6.2.1.  Unreachability local to the ASBR
-
-   An ASBR that selects as best a path received over a newly established
-   EBGP session may transiently drop traffic.  This can typically happen
-   when the NEXT_HOP attribute differs from the IP address of the EBGP
-   peer, and the receiving ASBR has not yet resolved the MAC address
-   associated with the IP address of that "third party" NEXT_HOP.
-
-   A BGP speaker implementation may avoid such losses by ensuring that
-   "third party" NEXT_HOPs are resolved before installing paths using
-   these in the RIB.
-
-   Alternatively, the operator (script) may ping third party NEXT_HOPs
-   that are expected to be used before establishing the session.  By
-   proceeding like this, the MAC addresses associated with these third
-   party NEXT_HOPs are resolved by the startup initiator.
-
-
-
-
-
-
-
 
 Francois, et al.        Expires January 28, 2018                [Page 7]
 
 Internet-Draft        Graceful BGP session shutdown            July 2017
 
-
-6.2.2.  IBGP convergence
-
-   Corner cases leading to LoC can occur during the establishment of an
-   EBGP session.
-
-   A typical example for such transient unreachability for a given
-   prefix is the following:
-
-   Let's consider 3 route reflectors RR1, RR2, RR3.  There is a full
-   mesh of IBGP sessions between them.
-
-      1.  RR1 is initially advertising the current best path to the
-      members of its IBGP RR full-mesh.  It propagated that path within
-      its RR full-mesh.  RR2 knows only that path toward the prefix.
-
-      2.  RR3 receives a new best path originated by the startup
-      initiator, being one of its RR clients.  RR3 selects it as best,
-      and propagates an UPDATE within its RR full-mesh, i.e., to RR1 and
-      RR2.
-
-      3.  RR1 receives that path, reruns its decision process, and picks
-      this new path as best.  As a result, RR1 withdraws its previously
-      announced best-path on the IBGP sessions of its RR full-mesh.
-
-      4.  If, for any reason, RR3 processes the withdraw generated in
-      step 3, before processing the update generated in step 2, RR3
-      transiently suffers from unreachability for the affected prefix.
-
-   The use of [I-D.ietf-idr-best-external] among the RR of the IBGP
-   full-mesh can solve these corner cases by ensuring that within an AS,
-   the advertisement of a new route is not translated into the withdraw
-   of a former route.
-
-   Indeed, "best-external" ensures that an ASBR does not withdraw a
-   previously advertised (EBGP) path when it receives an additional,
-   preferred path over an IBGP session.  Also, "best-intra-cluster"
-   ensures that a RR does not withdraw a previously advertised (IBGP)
-   path to its non clients (e.g. other RRs in a mesh of RR) when it
-   receives a new, preferred path over an IBGP session.
 
 7.  IANA Considerations
 
