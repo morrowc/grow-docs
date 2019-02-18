@@ -231,11 +231,18 @@ Internet-Draft    Well-Known Community Policy Behavior      January 2019
    Unfortunately, it would be operationally disruptive for vendors to
    change their current implementations.
 
-   Vendors SHOULD clearly document the behavior of "set" directive in
-   their implementations.
+   Vendors SHOULD clearly document the behavior of a "set" directive
+   in their implementations, in the case of both the singular
+   operation:
+      set x:y
+   
+   or the two step operation:
+      delete *:*
+      add x:y
 
    Vendors MUST ensure that any Well-Known Communities specified after
-   this document's publication are removed by their "set" directive.
+   this document's publication are removed by their "set" directive, in
+   both the singular and dual operation invocation..
 
    Given the implementation inconsistencies described in this document,
    network operators are urged never to rely on any implicit
